@@ -29,3 +29,8 @@ Number(undefined) // NaN
 ```
 
 ### 使用场景
+
+<samp><b>null</b></samp>
+
+
+<samp><b>undefined</b></samp>
