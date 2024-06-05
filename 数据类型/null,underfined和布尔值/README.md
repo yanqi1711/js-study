@@ -1,6 +1,6 @@
 ## null和undefined
 
-### 含义
+### 探讨
 
 `null`和`undefined`都表示没有,含义非常相近.
 他们在转换成布尔类型的时候都自动表示为`false`,当使用`==`来运算时,的返回值为`true`
@@ -28,3 +28,4 @@ Number(null) // 0
 Number(undefined) // NaN
 ```
 
+### 使用场景
