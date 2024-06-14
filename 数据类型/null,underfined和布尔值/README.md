@@ -31,6 +31,41 @@ Number(undefined) // NaN
 ### 使用场景
 
 <samp><b>null</b></samp>
-
+调用函数时，某个参数未设置任何值，这时就会可以传入`null`，表示该参数为空
 
 <samp><b>undefined</b></samp>
+典型场景:
+```js
+// 变量声明了，但没有赋值
+var i;
+i // undefined
+
+// 调用函数时，应该提供的参数没有提供，该参数等于 undefined
+function f(x) {
+  return x;
+}
+f() // undefined
+
+// 对象没有赋值的属性
+var  o = new Object();
+o.p // undefined
+
+// 函数没有返回值时，默认返回 undefined
+function f() {}
+f() // undefined
+```
+
+## 布尔值
+
+布尔值只有`true`和`false`这两个值
+
+如果JS中预期某个位置应该是布尔值，会将该位置上现有的值自动转为布尔值。转换规则是除了下面六个值被转为`false`，其他都视为`true`
+
+- `undefined`
+- `null`
+- `false`
+- `0`
+- NaN
+- `''`或者`""` (空字符串)
+
+注意: 空数组和空对象的对应布尔值都是`true`
