@@ -159,6 +159,211 @@ JavaScript 的数值有多种表示方法，可以用字面形式直接表示，
 如果八进制、十六进制、二进制的数值里面，出现不属于该进制的数字，就会报错。
 
 
+```js
+0xzz // 报错
+0o88 // 报错
+0b22 // 报错
+```
+
+通常来说，有前导0的数值会被视为八进制，但是如果前导0后面有数字`8`和`9`,则该数被视为十进制
+
+```js
+0888 // 888
+0777 // 511
+```
+
+前导0表示八进制，处理时很容易造成混乱。ES5 的严格模式和 ES6，已经废除了这种表示法，但是浏览器为了兼容以前的代码，目前还继续支持这种表示法。
+
+## 特殊数值
+
+### 正零和负零
+
+前面说过，JavaScript 的64位浮点数之中，有一个二进制位是符号位。这意味着，任何一个数都有一个对应的负值，就连0也不例外。
+
+JavaScript 内部实际上存在2个0：一个是+0，一个是-0，区别就是64位浮点数表示法的符号位不同。它们是等价的。
+
+```js
+-0 === +0 // true
+0 === -0 // true
+0 === +0 // true
+```
+
+几乎所有场合，正零和负零都会被当作正常的`0`
+
+```js
++0 // 0
+-0 // 0
+(-0).toString() // '0'
+(+0).toString() // '0'
+```
+
+唯一有区别的场合是，`+0`和`-0`被当作分母，返回值是不想等的
+
+```js
+(1 / +0) === (1 / -0) // false
+```
+
+上面的代码之所以出现这样的结果，是因为除以正零得到`+Infinity`，除以负零得到`-Infinity`，这两者是不想等的。
+
+### NaN
+
+`NaN`是 JavaScript 的特殊值，表示“非数字”（Not a Number），主要出现在将字符串解析成数字出错的场合。
+
+```js
+5 - 'x' // NaN
+```
+
+另外，一些数学函数的运算结果会出现NaN。
+
+```js
+Math.acos(2) // NaN
+Math.log(-1) // NaN
+Math.sqrt(-1) // NaN
+```
+
+`0`除以`0`会得到`NaN`。
+
+```js
+0 / 0 // NaN
+```
+
+需要注意的是，NaN不是独立的数据类型，而是一个特殊数值，它的数据类型依然属于Number，使用typeof运算符可以看得很清楚。
+
+```js
+typeof NaN // 'number'
+```
+
+#### NaN的运算规则
+
+`NaN`不等于任何值，包括它本身
+
+```js
+NaN === NaN // false
+```
+
+数组的`indexOf`方法内部使用的是严格相等运算符，所以该方法对`NaN`不成立。
+
+```js
+[NaN].indexOf(NaN) // -1
+```
+
+`NaN`在布尔运算时被当作`false`
+
+```js
+Boolean(NaN) // false
+```
+
+`NaN`与任何数（包括自己）的运算，得到的都是`NaN`
+
+```js
+NaN + 32 // NaN
+NaN - 32 // NaN
+NaN * 32 // NaN
+NaN / 32 // NaN
+```
+
+### Infinity
+
+Infinity表示“无穷”，用来表示两种场景。一种是一个正的数值太大，或一个负的数值太小，无法表示；另一种是非0数值除以0，得到Infinity。
+
+```js
+// 场景一
+Math.pow(2, 1024)
+// Infinity
+
+// 场景二
+0 / 0 // NaN
+1 / 0 // Infinity
+```
+
+上面代码中，第一个场景是一个表达式的计算结果太大，超出了能够表示的范围，因此返回`Infinity`。第二个场景是`0`除以`0`会得到`NaN`，而非0数值除以`0`，会返回`Infinity`。
+
+`Infinity`有正负之分，`Infinity`表示正的无穷，`-Infinity`表示负的无穷。
+
+```js
+Infinity === -Infinity // false
+
+1 / -0 // -Infinity
+-1 / -0 // Infinity
+```
+
+上面代码中，非零正数除以`-0`，会得到`-Infinity`，负数除以`-0`，会得到`Infinity`。
+
+由于数值正向溢出（overflow）、负向溢出（underflow）和被`0`除，JavaScript 都不报错，所以单纯的数学运算几乎没有可能抛出错误。
+
+`Infinity`大于一切数值（除了`NaN`），`-Infinity`小于一切数值（除了`NaN`）。
+
+```js
+Infinity > 1000 // true
+-Infinity < -1000 // true
+```
+
+`Infinity`与`NaN`比较，总是返回`false`
+
+```js
+Infinity > NaN // false
+-Infinity > NaN // false
+
+Infinity < NaN // false
+-Infinity < NaN // true
+```
+
+#### Infinity的运算规则
+
+`Infinity`的四则运算，符合无穷的数学计算规则
+
+```js
+5 * Infinity // Infinity
+5 - Infinity // -Infinity
+5 / Infinity // 0
+Infinity / 5 // Infinity
+```
+
+`0`乘以`Infinity`，返回`NaN`；`0`除以`Infinity`，返回`0`；`Infinity`除以`0`，返回`Infinity`。
+
+```js
+0 * Infinity // NaN
+0 / Infinity // 0
+Infinity / 0 // Infinity
+```
+
+`Infinity`加上或乘以自身，得到`Infinity`。
+
+```js
+Infinity + Infinity // Infinity
+Infinity * Infinity // Infinity
+```
+
+`Infinity`减去或除以自身，得到`NaN`。
+
+```js
+Infinity - Infinity // NaN
+Infinity / Infinity // NaN
+```
+
+`Infinity`与`null`计算时，`null`会转成0，等同于与`0`的计算。
+
+```js
+null * Infinity // 0
+null / Infinity // 0
+Infinity / null // Infinity
+```
+
+`Infinity`与`undefined`计算，返回都是`NaN`。
+
+```js
+undefined * Infinity // NaN
+undefined / Infinity // NaN
+undefined + Infinity // NaN
+undefined - Infinity // NaN
+Infinity / undefined // NaN
+```
+
+## 数值相关的全局方法
+
+### parseInt()
+
+
 
 <br>
 <a href="../../README.md"><img src="https://img.shields.io/badge/-%E8%BF%94%E5%9B%9E%E9%A6%96%E9%A1%B5-grey" alt="返回首页"/></a>
