@@ -1,6 +1,6 @@
 # JavaScript学习记录
 
-<img src='./screenshots/SkillIconsJavascript.svg'/>
+<img src='/screenshots/SkillIconsJavascript.svg'/>
 
 javascript的初体验-基于ES5<br/>
 Code Exercise: [app.coderpad.io](https://app.coderpad.io/)<br/>
