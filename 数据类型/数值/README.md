@@ -360,6 +360,7 @@ Infinity / undefined // NaN
 ```
 
 ## 数值相关的全局方法
+这些方法都是全局方法，调用时不需要指定对象，直接调用就可以
 
 ### parseInt()
 
@@ -369,7 +370,7 @@ Infinity / undefined // NaN
 parseInt('123') // 123
 ```
 
-如果字符串头部有空格，空格会被自动去除
+如果字符串头部或者尾部有空格，空格会被自动去除
 
 ```js
 parseInt('    123') // 123
@@ -381,54 +382,6 @@ parseInt('    123') // 123
 parseInt(1.23) // 1
 // 等同于
 parseInt('1.23') // 1
-```
-
-字符串转为整数的时候，是一个个字符依次转换，如果遇到不能转为数字的字符，就不再进行下去，返回已经转好的部分。
-
-```js
-parseInt('8a') // 8
-parseInt('12**') // 12
-parseInt('12.34') // 12
-parseInt('15e2') // 15
-parseInt('15px') // 15
-```
-
-上面代码中，`parseInt`的参数都是字符串，结果只返回字符串头部可以转为数字的部分。
-
-如果字符串的第一个字符不能转化为数字（后面跟着数字的正负号除外），返回`NaN`。
-
-```js
-parseInt('abc') // NaN
-parseInt('.3') // NaN
-parseInt('') // // NaN
-parseInt('+') // NaN
-parseInt('+1') // 1
-```
-
-所以，`parseInt`的返回值要么是十进制整数，要么是NaN。
-
-如果字符串以 `0x` 或 `0X` 开头，`parseInt`会自动将其转为十六进制。
-
-```js
-parseInt('0x10') // 16
-```
-
-如果字符串以`0`开头，将其按照十进制处理。
-
-```js
-parseInt('0123') // 123
-```
-
-对于那些会自动转为科学计数法的数字，`parseInt` 会将科学计数法的表示方法视为字符串，因此导致一些奇怪的结果。
-
-```js
-parseInt(1000000000000000000000.5) // 1
-// 等同于
-parseInt('1e+21') // 1
-
-parseInt(0.0000008) // 8
-// 等同于
-parseInt('8e-7') // 8
 ```
 
 `parseInt`可以接受第二个参数（2到36之间），用于指定进制，返回该值对应的十进制数。默认是十进制。
@@ -457,48 +410,69 @@ parseInt('10', null) // 10
 parseInt('10', undefined) // 10
 ```
 
-如果字符串包含对于指定进制无意义的字符，则从最高位开始，只返回可以转换的数值。如果最高位无法转换，则直接返回 `NaN`。
+JavaScript 不再允许将带有前缀 0 的数字视为八进制数，而是要求忽略这个 0。但是，为了保证兼容性，大部分浏览器并没有部署这一条规定。（NodeJS中严格模式不允许出现八进制的字面量）
+
+### parseFloat()
+
+`parseFloat`方法用于将一个字符串转为浮点数
 
 ```js
-parseInt('1546', 2) // 1
-parseInt('546', 2) // NaN
+parseFloat('3.14') // 3.14
 ```
 
-前面说过，如果 `parseInt` 的第一个参数不是字符串，会被先转为字符串。这会导致一些令人意外的结果。
+`parseFloat`方法会自动过滤字符串前导的空格
 
 ```js
-parseInt(0x11, 36) // 43
-parseInt(0x11, 2) // 1
-
-// 等同于
-parseInt(String(0x11), 36)
-parseInt(String(0x11), 2)
-
-// 等同于
-parseInt('17', 36)
-parseInt('17', 2)
+parseFloat('\t\v\r12.34\n ') // 12.34
 ```
 
-上面代码中，十六进制的 `0x11` 会被先转为十进制的 17，再转为字符串。然后，再用 36 进制或二进制解读字符串 `17`，最后返回结果 `43` 和 `1`。
+它与`Number`函数的一个区别：
+```js
+parseFloat(true)  // NaN
+Number(true) // 1
 
-这种处理方式，对于八进制的前缀 0，尤其需要注意。
+parseFloat(null) // NaN
+Number(null) // 0
+
+parseFloat('') // NaN
+Number('') // 0
+
+parseFloat('123.45#') // 123.45
+Number('123.45#') // NaN
+```
+
+### isNaN()
+`isNaN`方法可以用来判断一个值是否为NaN
+
+但是，`isNaN`只对数值有效，如果传入其他值，会被先转成数值
+```
+isNaN('Hello') // true
+// 等同于
+isNaN(Number('Hello')) // true
+```
+
+判断NaN可靠的方法是，利用NaN为唯一不等于自身的值的这个特点，进行判断
 
 ```js
-parseInt(011, 2) // NaN
-
-// 等同于
-parseInt(String(011), 2)
-
-// 等同于
-parseInt(String(9), 2)
+function myIsNaN(value) {
+  return value !== value;
+}
 ```
 
-JavaScript 不再允许将带有前缀 0 的数字视为八进制数，而是要求忽略这个 0。但是，为了保证兼容性，大部分浏览器并没有部署这一条规定。
+### isFinite
 
+`isFinite`方法返回一个布尔值，表示某个值是否为正常的数值
 
+除了`Infinity`、`-Infinity`、`NaN`和`undefined`这几个值会返回`false`，`isFinite`对于其他的数值都会返回`true`
 
-
-
+```js
+isFinite(Infinity) // false
+isFinite(-Infinity) // false
+isFinite(NaN) // false
+isFinite(undefined) // false
+isFinite(null) // true
+isFinite(-1) // true
+```
 
 <br>
 <a href="../../README.md"><img src="https://img.shields.io/badge/-%E8%BF%94%E5%9B%9E%E9%A6%96%E9%A1%B5-grey" alt="返回首页"/></a>
